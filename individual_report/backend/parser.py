@@ -40,6 +40,30 @@ MANAGERIAL_COMPETENCIES = [
     "Представление и защита интересов команды"
 ]
 
+# Префиксы для маппинга управленческих компетенций
+MANAGERIAL_PREFIXES = ["РУК ", "РУК.", "РУК:"]
+
+
+def _normalize_competency_name(name: str) -> str:
+    """Нормализует название компетенции, удаляя префиксы типа 'РУК '."""
+    name = name.strip()
+    for prefix in MANAGERIAL_PREFIXES:
+        if name.startswith(prefix):
+            return name[len(prefix):].strip()
+    return name
+
+
+def _is_managerial_competency(name: str) -> bool:
+    """Проверяет, является ли компетенция управленческой (с учетом префиксов)."""
+    normalized = _normalize_competency_name(name)
+    return normalized in MANAGERIAL_COMPETENCIES
+
+
+def _get_managerial_competency_name(name: str) -> str:
+    """Возвращает нормализованное название управленческой компетенции."""
+    normalized = _normalize_competency_name(name)
+    return normalized if normalized in MANAGERIAL_COMPETENCIES else name
+
 
 class ExcelParser:
     def __init__(self, file_path: str):
@@ -260,11 +284,12 @@ class ExcelParser:
 
             score = self._normalize_score(self.sheet.cell(row=row, column=col_idx).value)
             if score is not None:
-                if current_section == 'soft':
+                # Проверяем, является ли компетенция управленческой (даже если она в блоке soft)
+                if _is_managerial_competency(cell_str):
+                    normalized_name = _get_managerial_competency_name(cell_str)
+                    managerial_comp.append((normalized_name, score))
+                elif current_section == 'soft':
                     soft_comp.append((cell_str, score))
-                elif cell_str in MANAGERIAL_COMPETENCIES:
-                    # Добавляем управленческие компетенции, если они встречаются после soft или hard инструкции
-                    managerial_comp.append((cell_str, score))
 
         return soft_comp, managerial_comp
 

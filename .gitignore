@@ -1,7 +1,28 @@
 ```
-# Logs and temp files
+# Logs
 *.log
 
 # Output directories
-individual_report/output/
+output/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Dependencies
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
 ```
