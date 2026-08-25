@@ -646,8 +646,8 @@
     <section id="section-charts">
         <div class="charts-row">
             <div class="chart-box">
-                <h2>Hard компетенции</h2>
-                <canvas id="hardChart"></canvas>
+                <h2>Управленческие компетенции</h2>
+                <canvas id="managerialChart"></canvas>
                 <div class="legend-row">
                     <span><span class="color-box" style="background:#006FFF;"></span> Самооценка</span>
                     <span><span class="color-box" style="background:#FF310C;"></span> Руководитель</span>
@@ -710,12 +710,14 @@
                         <th style="text-align:center;">Самооценка</th>
                         <th style="text-align:center;">Руководитель</th>
                         <th style="text-align:center;">Коллеги</th>
+                        <th style="text-align:center;">Подчиненные</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% set soft_self_list = [] %}
                     {% set soft_mgr_list = [] %}
                     {% set soft_col_list = [] %}
+                    {% set soft_sub_list = [] %}
                     {% for comp in soft_skills.labels %}
                         {% set idx = loop.index0 %}
                         {% if soft_skills.self[idx] is not none %}
@@ -727,10 +729,14 @@
                         {% if soft_skills.colleagues[idx] is not none %}
                             {% set _ = soft_col_list.append(soft_skills.colleagues[idx]) %}
                         {% endif %}
+                        {% if soft_skills.subordinates[idx] is not none %}
+                            {% set _ = soft_sub_list.append(soft_skills.subordinates[idx]) %}
+                        {% endif %}
                     {% endfor %}
                     {% set soft_avg_self = (soft_self_list | sum / soft_self_list | length) if soft_self_list else none %}
                     {% set soft_avg_mgr = (soft_mgr_list | sum / soft_mgr_list | length) if soft_mgr_list else none %}
                     {% set soft_avg_col = (soft_col_list | sum / soft_col_list | length) if soft_col_list else none %}
+                    {% set soft_avg_sub = (soft_sub_list | sum / soft_sub_list | length) if soft_sub_list else none %}
 
                     <tr class="table-section-header">
                         <td><strong>Soft компетенции</strong></td>
@@ -742,6 +748,9 @@
                         </td>
                         <td class="score-cell">
                             {% if soft_avg_col is not none %}{{ soft_avg_col | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
+                        <td class="score-cell">
+                            {% if soft_avg_sub is not none %}{{ soft_avg_sub | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
                     </tr>
 
@@ -757,16 +766,21 @@
                         <td class="score-cell">
                             {% if block.averages.colleagues is not none %}{{ block.averages.colleagues }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
+                        <td class="score-cell">
+                            {% if block.averages.subordinates is not none %}{{ block.averages.subordinates }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
                     </tr>
                     {% for comp in block.competencies %}
                     {% set idx = soft_skills.labels.index(comp) if comp in soft_skills.labels else -1 %}
                     {% set self_val = soft_skills.self[idx] if idx >= 0 else none %}
                     {% set mgr_val = soft_skills.manager[idx] if idx >= 0 else none %}
                     {% set col_val = soft_skills.colleagues[idx] if idx >= 0 else none %}
+                    {% set sub_val = soft_skills.subordinates[idx] if idx >= 0 else none %}
                     {% set vals = [] %}
                     {% if self_val is not none %}{% set _ = vals.append(self_val) %}{% endif %}
                     {% if mgr_val is not none %}{% set _ = vals.append(mgr_val) %}{% endif %}
                     {% if col_val is not none %}{% set _ = vals.append(col_val) %}{% endif %}
+                    {% if sub_val is not none %}{% set _ = vals.append(sub_val) %}{% endif %}
                     {% set max_diff = 0 %}
                     {% if vals|length >= 2 %}
                         {% for i in range(vals|length) %}
@@ -794,40 +808,66 @@
                         <td class="score-cell">
                             {% if col_val is not none %}{{ col_val }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
+                        <td class="score-cell">
+                            {% if sub_val is not none %}{{ sub_val }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                     {% endfor %}
 
-                    {% if hard_skills.labels %}
-                    {% set hard_self_list = [] %}
-                    {% set hard_mgr_list = [] %}
-                    {% for i in range(hard_skills.labels|length) %}
-                        {% if hard_skills.self[i] is not none %}
-                            {% set _ = hard_self_list.append(hard_skills.self[i]) %}
-                        {% endif %}
-                        {% if hard_skills.manager[i] is not none %}
-                            {% set _ = hard_mgr_list.append(hard_skills.manager[i]) %}
+                    {% if managerial_block.name %}
+                    {% set mgr_self_list = [] %}
+                    {% set mgr_mgr_list = [] %}
+                    {% set mgr_col_list = [] %}
+                    {% set mgr_sub_list = [] %}
+                    {% for comp in managerial_block.competencies %}
+                        {% set idx = managerial_skills.labels.index(comp) if comp in managerial_skills.labels else -1 %}
+                        {% if idx >= 0 %}
+                            {% if managerial_skills.self[idx] is not none %}
+                                {% set _ = mgr_self_list.append(managerial_skills.self[idx]) %}
+                            {% endif %}
+                            {% if managerial_skills.manager[idx] is not none %}
+                                {% set _ = mgr_mgr_list.append(managerial_skills.manager[idx]) %}
+                            {% endif %}
+                            {% if managerial_skills.colleagues[idx] is not none %}
+                                {% set _ = mgr_col_list.append(managerial_skills.colleagues[idx]) %}
+                            {% endif %}
+                            {% if managerial_skills.subordinates[idx] is not none %}
+                                {% set _ = mgr_sub_list.append(managerial_skills.subordinates[idx]) %}
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
-                    {% set hard_avg_self = (hard_self_list | sum / hard_self_list | length) if hard_self_list else none %}
-                    {% set hard_avg_mgr = (hard_mgr_list | sum / hard_mgr_list | length) if hard_mgr_list else none %}
+                    {% set mgr_avg_self = (mgr_self_list | sum / mgr_self_list | length) if mgr_self_list else none %}
+                    {% set mgr_avg_mgr = (mgr_mgr_list | sum / mgr_mgr_list | length) if mgr_mgr_list else none %}
+                    {% set mgr_avg_col = (mgr_col_list | sum / mgr_col_list | length) if mgr_col_list else none %}
+                    {% set mgr_avg_sub = (mgr_sub_list | sum / mgr_sub_list | length) if mgr_sub_list else none %}
 
                     <tr class="table-section-header">
-                        <td><strong>Hard компетенции</strong></td>
+                        <td><strong>Управленческие компетенции</strong></td>
                         <td class="score-cell">
-                            {% if hard_avg_self is not none %}{{ hard_avg_self | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
+                            {% if mgr_avg_self is not none %}{{ mgr_avg_self | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
                         <td class="score-cell">
-                            {% if hard_avg_mgr is not none %}{{ hard_avg_mgr | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
+                            {% if mgr_avg_mgr is not none %}{{ mgr_avg_mgr | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
-                        <td class="score-cell">—</td>
+                        <td class="score-cell">
+                            {% if mgr_avg_col is not none %}{{ mgr_avg_col | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
+                        <td class="score-cell">
+                            {% if mgr_avg_sub is not none %}{{ mgr_avg_sub | round(2) }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
                     </tr>
-                    {% for i in range(hard_skills.labels|length) %}
-                    {% set self_val = hard_skills.self[i] %}
-                    {% set mgr_val = hard_skills.manager[i] %}
+                    {% for comp in managerial_block.competencies %}
+                    {% set idx = managerial_skills.labels.index(comp) if comp in managerial_skills.labels else -1 %}
+                    {% set self_val = managerial_skills.self[idx] if idx >= 0 else none %}
+                    {% set mgr_val = managerial_skills.manager[idx] if idx >= 0 else none %}
+                    {% set col_val = managerial_skills.colleagues[idx] if idx >= 0 else none %}
+                    {% set sub_val = managerial_skills.subordinates[idx] if idx >= 0 else none %}
                     {% set vals = [] %}
                     {% if self_val is not none %}{% set _ = vals.append(self_val) %}{% endif %}
                     {% if mgr_val is not none %}{% set _ = vals.append(mgr_val) %}{% endif %}
+                    {% if col_val is not none %}{% set _ = vals.append(col_val) %}{% endif %}
+                    {% if sub_val is not none %}{% set _ = vals.append(sub_val) %}{% endif %}
                     {% set max_diff = 0 %}
                     {% if vals|length >= 2 %}
                         {% for i2 in range(vals|length) %}
@@ -838,9 +878,10 @@
                         {% endfor %}
                     {% endif %}
                     {% set has_discrepancy = max_diff >= 2 %}
+                    {% set comp_desc = managerial_block.competency_descriptions.get(comp, '') %}
                     <tr>
-                        <td>
-                            {{ hard_skills.labels[i] | capitalize }}
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name{% if comp_desc %} tooltip-trigger{% endif %}"{% if comp_desc %} data-tooltip="{{ comp_desc }}"{% endif %}>{{ comp | capitalize }}</span>
                             {% if has_discrepancy %}
                             <span class="discrepancy-icon" title="Расхождение оценок на 2 и более балла">⚠️</span>
                             {% endif %}
@@ -851,7 +892,12 @@
                         <td class="score-cell">
                             {% if mgr_val is not none %}{{ mgr_val }}{% else %}<span class="score-null">—</span>{% endif %}
                         </td>
-                        <td class="score-cell">—</td>
+                        <td class="score-cell">
+                            {% if col_val is not none %}{{ col_val }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
+                        <td class="score-cell">
+                            {% if sub_val is not none %}{{ sub_val }}{% else %}<span class="score-null">—</span>{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                     {% endif %}
@@ -1092,13 +1138,16 @@
     window.REPORT_EMPLOYEE_NAME = {{ employee.name | tojson }};
     window.REPORT_EMPLOYEE_ID = {{ employee.id | tojson }};
     window.REPORT_CASE_IDS = {{ cases | map(attribute='id') | list | tojson }};
-    window.REPORT_HARD_LABELS = {{ hard_skills.labels | tojson }};
-    window.REPORT_HARD_SELF = {{ hard_skills.self | tojson }};
-    window.REPORT_HARD_MANAGER = {{ hard_skills.manager | tojson }};
+    window.REPORT_MANAGERIAL_LABELS = {{ managerial_skills.labels | tojson }};
+    window.REPORT_MANAGERIAL_SELF = {{ managerial_skills.self | tojson }};
+    window.REPORT_MANAGERIAL_MANAGER = {{ managerial_skills.manager | tojson }};
+    window.REPORT_MANAGERIAL_COLLEAGUES = {{ managerial_skills.colleagues | tojson }};
+    window.REPORT_MANAGERIAL_SUBORDINATES = {{ managerial_skills.subordinates | tojson }};
     window.REPORT_BLOCK_LABELS = {{ soft_blocks | map(attribute='name') | list | tojson }};
     window.REPORT_BLOCK_SELF = {{ soft_blocks | map(attribute='averages.self') | list | tojson }};
     window.REPORT_BLOCK_MANAGER = {{ soft_blocks | map(attribute='averages.manager') | list | tojson }};
     window.REPORT_BLOCK_COLLEAGUES = {{ soft_blocks | map(attribute='averages.colleagues') | list | tojson }};
+    window.REPORT_BLOCK_SUBORDINATES = {{ soft_blocks | map(attribute='averages.subordinates') | list | tojson }};
 </script>
 
 <!-- Встраиваем JavaScript код напрямую для работы без HTTP-сервера -->
@@ -1119,38 +1168,41 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    const hardLabels = window.REPORT_HARD_LABELS || [];
-    const hardSelf = window.REPORT_HARD_SELF || [];
-    const hardManager = window.REPORT_HARD_MANAGER || [];
+    const managerialLabels = window.REPORT_MANAGERIAL_LABELS || [];
+    const managerialSelf = window.REPORT_MANAGERIAL_SELF || [];
+    const managerialManager = window.REPORT_MANAGERIAL_MANAGER || [];
+    const managerialColleagues = window.REPORT_MANAGERIAL_COLLEAGUES || [];
+    const managerialSubordinates = window.REPORT_MANAGERIAL_SUBORDINATES || [];
 
     const blockLabels = window.REPORT_BLOCK_LABELS || [];
     const blockSelf = window.REPORT_BLOCK_SELF || [];
     const blockManager = window.REPORT_BLOCK_MANAGER || [];
     const blockColleagues = window.REPORT_BLOCK_COLLEAGUES || [];
+    const blockSubordinates = window.REPORT_BLOCK_SUBORDINATES || [];
 
     function nullToUndefined(arr) {
         return arr.map(v => (v === null ? undefined : v));
     }
 
-    // Инициализация графика Hard компетенции
-    const hardChartEl = document.getElementById('hardChart');
-    if (hardChartEl && hardLabels && hardLabels.length > 0) {
-        const ctxHard = hardChartEl.getContext('2d');
-        new Chart(ctxHard, {
+    // Инициализация графика Управленческие компетенции
+    const managerialChartEl = document.getElementById('managerialChart');
+    if (managerialChartEl && managerialLabels && managerialLabels.length > 0) {
+        const ctxManagerial = managerialChartEl.getContext('2d');
+        new Chart(ctxManagerial, {
             type: 'bar',
             data: {
-                labels: hardLabels,
+                labels: managerialLabels,
                 datasets: [
                     {
                         label: 'Самооценка',
-                        data: nullToUndefined(hardSelf),
+                        data: nullToUndefined(managerialSelf),
                         backgroundColor: '#006FFF',
                         borderRadius: 4,
                         barPercentage: 0.6,
                     },
                     {
                         label: 'Руководитель',
-                        data: nullToUndefined(hardManager),
+                        data: nullToUndefined(managerialManager),
                         backgroundColor: '#FF310C',
                         borderRadius: 4,
                         barPercentage: 0.6,

@@ -258,10 +258,11 @@ def generate_html(report: Dict, output_dir: str, vendor_dir: str, static_js_dir:
         colleagues=report['colleagues'],
         soft_skills=report['soft_skills'],
         soft_blocks=report['soft_blocks'],
-        hard_skills=report['hard_skills'],
+        managerial_block=report.get('managerial_block', {}),
+        managerial_skills=report.get('managerial_skills', {'labels': [], 'self': [], 'manager': [], 'colleagues': [], 'subordinates': []}),
         cases=report['cases'],
         performance=report['performance'],
-        all_competencies=sorted(set(report['soft_skills']['labels']) | set(report['hard_skills']['labels'])),
+        all_competencies=sorted(set(report['soft_skills']['labels']) | set(report.get('managerial_skills', {}).get('labels', []))),
         logo_base64=logo_base64,
         soft_recommendations=report.get('soft_recommendations', {}),
         behavioral_patterns=report.get('behavioral_patterns', [])
@@ -326,7 +327,7 @@ def process_employee(emp_name: str, files_dict: Dict[str, str], ai_scores: Dict,
         logger.error(f"Ошибка генерации HTML для {emp_name}: {e}")
         return False
 
-    logger.info(f"Для {emp_name}: Soft={len(report['soft_skills']['labels'])}, Hard={len(report['hard_skills']['labels'])}, Кейсов={len(report['cases'])}")
+    logger.info(f"Для {emp_name}: Soft={len(report['soft_skills']['labels'])}, Managerial={len(report.get('managerial_skills', {}).get('labels', []))}, Кейсов={len(report['cases'])}")
     return True
 
 
