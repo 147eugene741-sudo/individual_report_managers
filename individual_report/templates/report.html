@@ -1198,21 +1198,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         data: nullToUndefined(managerialSelf),
                         backgroundColor: '#006FFF',
                         borderRadius: 4,
-                        barPercentage: 0.6,
+                        barPercentage: 0.5,
                     },
                     {
                         label: 'Руководитель',
                         data: nullToUndefined(managerialManager),
                         backgroundColor: '#FF310C',
                         borderRadius: 4,
-                        barPercentage: 0.6,
+                        barPercentage: 0.5,
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                aspectRatio: 2,
+                aspectRatio: 1.8,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -1232,8 +1232,31 @@ document.addEventListener('DOMContentLoaded', function() {
                         title: { display: false }
                     },
                     x: {
-                        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 },
-                        grid: { display: false }
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 0,
+                            minRotation: 0,
+                            callback: function(value, index, ticks) {
+                                const label = this.getLabelForValue(value);
+                                // Разбиваем строку на части по пробелам, собираем части до ~15 символов
+                                const words = label.split(' ');
+                                let lines = [];
+                                let currentLine = '';
+                                words.forEach(word => {
+                                    if ((currentLine + word).length > 15) {
+                                        lines.push(currentLine.trim());
+                                        currentLine = word + ' ';
+                                    } else {
+                                        currentLine += word + ' ';
+                                    }
+                                });
+                                if (currentLine.trim()) lines.push(currentLine.trim());
+                                return lines.length > 1 ? lines : label;
+                            }
+                        },
+                        grid: { display: false },
+                        barPercentage: 0.5,
+                        categoryPercentage: 0.9
                     }
                 }
             }
