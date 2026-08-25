@@ -2,11 +2,23 @@
 # Logs
 *.log
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.venv.bak/
+pip-log.txt
+pip-selfcheck.json
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
 # Output directories
 individual_report/output/
-
-# Environment
-.env
-.env.local
-*.env.*
 ```

@@ -25,10 +25,20 @@ except json.JSONDecodeError as e:
 
 PARSER_CONFIG = CONFIG['parser']
 AI_CONFIG = CONFIG['ai']
+SOFT_BLOCK_MAP = CONFIG.get('soft_block_map', {})
 
 # Магические числа вынесены в конфиг или константы
 MAX_INSTRUCTION_LENGTH = PARSER_CONFIG.get('max_instruction_length', 80)
 MIN_COMPETENCY_NAME_LENGTH = PARSER_CONFIG.get('min_competency_name_length', 3)
+
+# Управленческие компетенции (фиксированный список)
+MANAGERIAL_COMPETENCIES = [
+    "Формирование и построение команды",
+    "Каскадирование стратегии",
+    "Управление эффективностью команды",
+    "Управление ресурсами и бюджетом",
+    "Представление и защита интересов команды"
+]
 
 
 class ExcelParser:
@@ -206,8 +216,10 @@ class ExcelParser:
             return len(text) > MAX_INSTRUCTION_LENGTH  # если слишком длинный, считаем инструкцией
 
         soft_comp = []
-        hard_comp = []
+        managerial_comp = []
         current_section = None
+        found_soft_instruction = False
+        hard_section_found = False
 
         for row in range(header_row + 1, self.sheet.max_row + 1):
             cell_value = self.sheet.cell(row=row, column=1).value
@@ -217,9 +229,12 @@ class ExcelParser:
 
             if PARSER_CONFIG['soft_instruction_text'].lower() in cell_str.lower():
                 current_section = 'soft'
+                found_soft_instruction = True
                 continue
+            
+            # Пропускаем строку с инструкцией для хардов (если есть)
             if PARSER_CONFIG['hard_instruction_text'].lower() in cell_str.lower():
-                current_section = 'hard'
+                hard_section_found = True
                 continue
 
             if current_section is None:
@@ -247,10 +262,11 @@ class ExcelParser:
             if score is not None:
                 if current_section == 'soft':
                     soft_comp.append((cell_str, score))
-                else:
-                    hard_comp.append((cell_str, score))
+                elif cell_str in MANAGERIAL_COMPETENCIES:
+                    # Добавляем управленческие компетенции, если они встречаются после soft или hard инструкции
+                    managerial_comp.append((cell_str, score))
 
-        return soft_comp, hard_comp
+        return soft_comp, managerial_comp
 
     def _parse_open_questions(self) -> List[Dict]:
         """Парсит блок открытых вопросов."""
@@ -298,7 +314,7 @@ class ExcelParser:
     def parse(self) -> Dict:
         """Основной метод парсинга."""
         meta = self._extract_meta()
-        soft_comps, hard_comps = self._parse_competencies()
+        soft_comps, managerial_comps = self._parse_competencies()
         open_qs = self._parse_open_questions()
 
         return {
@@ -308,9 +324,9 @@ class ExcelParser:
                     'labels': [c[0] for c in soft_comps],
                     'scores': [c[1] for c in soft_comps]
                 },
-                'hard': {
-                    'labels': [c[0] for c in hard_comps],
-                    'scores': [c[1] for c in hard_comps]
+                'managerial': {
+                    'labels': [c[0] for c in managerial_comps],
+                    'scores': [c[1] for c in managerial_comps]
                 }
             },
             'open_questions': open_qs

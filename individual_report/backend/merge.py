@@ -122,6 +122,28 @@ def _build_soft_blocks(all_soft_keys: set, self_soft: dict, manager_soft: dict, 
     return soft_blocks
 
 
+def _build_managerial_block(managerial_comps: Dict[str, Optional[float]]) -> Dict:
+    """
+    Строит блок управленческих компетенций.
+    Возвращает словарь с названием блока, описанием, списком компетенций и средними значениями.
+    """
+    block_name = "Управленческие компетенции"
+    block_desc = COMPETENCY_DESCRIPTIONS.get('blocks', {}).get(block_name, '')
+    comp_descriptions = COMPETENCY_DESCRIPTIONS.get('competencies', {})
+    
+    # Формируем описания для каждой компетенции
+    comp_desc_map = {}
+    for comp in managerial_comps.keys():
+        comp_desc_map[comp] = comp_descriptions.get(comp, '')
+    
+    return {
+        'name': block_name,
+        'description': block_desc,
+        'competencies': list(managerial_comps.keys()),
+        'competency_descriptions': comp_desc_map
+    }
+
+
 def _extract_cases(self_data: Dict, employee_key: str, ai_scores: Dict) -> List[Dict]:
     """
     Извлекает только те открытые вопросы, которые являются кейсами.
@@ -308,20 +330,42 @@ def merge_reports(self_data: Dict, manager_data: Dict, colleagues_data: Dict, ai
 
     soft_blocks = _build_soft_blocks(all_soft_keys, self_soft, manager_soft, colleagues_soft, subordinates_soft)
 
-    # Hard
-    self_hard = _extract_competencies(self_data, 'hard', 'self')
-    manager_hard = _extract_competencies(manager_data, 'hard', 'manager')
+    # Managerial (вместо hard)
+    self_managerial = _extract_competencies(self_data, 'managerial', 'self')
+    manager_managerial = _extract_competencies(manager_data, 'managerial', 'manager')
+    colleagues_managerial = _extract_competencies(colleagues_data, 'managerial', 'colleagues')
+    subordinates_managerial = _extract_competencies(subordinates_data, 'managerial', 'subordinates') if subordinates_data else {}
 
-    all_hard_keys = set(self_hard.keys()) | set(manager_hard.keys())
-    sorted_hard_keys = sorted(all_hard_keys)
+    all_managerial_keys = set(self_managerial.keys()) | set(manager_managerial.keys()) | set(colleagues_managerial.keys()) | set(subordinates_managerial.keys())
+    sorted_managerial_keys = sorted(all_managerial_keys)
 
-    hard_labels = []
-    self_hard_scores = []
-    manager_hard_scores = []
-    for key in sorted_hard_keys:
-        hard_labels.append(key)
-        self_hard_scores.append(self_hard.get(key))
-        manager_hard_scores.append(manager_hard.get(key))
+    managerial_labels = []
+    self_managerial_scores = []
+    manager_managerial_scores = []
+    colleagues_managerial_scores = []
+    subordinates_managerial_scores = []
+    for key in sorted_managerial_keys:
+        managerial_labels.append(key)
+        self_managerial_scores.append(self_managerial.get(key))
+        manager_managerial_scores.append(manager_managerial.get(key))
+        colleagues_managerial_scores.append(colleagues_managerial.get(key))
+        subordinates_managerial_scores.append(subordinates_managerial.get(key))
+
+    # Строим блок управленческих компетенций
+    managerial_block = _build_managerial_block({k: v for k, v in zip(sorted_managerial_keys, manager_managerial_scores) if v is not None})
+    
+    # Добавляем средние значения в блок управленческих компетенций
+    self_mgr_filtered = [s for s in self_managerial_scores if s is not None]
+    mgr_mgr_filtered = [s for s in manager_managerial_scores if s is not None]
+    col_mgr_filtered = [s for s in colleagues_managerial_scores if s is not None]
+    sub_mgr_filtered = [s for s in subordinates_managerial_scores if s is not None]
+    
+    managerial_block['averages'] = {
+        'self': round(sum(self_mgr_filtered) / len(self_mgr_filtered), 2) if self_mgr_filtered else None,
+        'manager': round(sum(mgr_mgr_filtered) / len(mgr_mgr_filtered), 2) if mgr_mgr_filtered else None,
+        'colleagues': round(sum(col_mgr_filtered) / len(col_mgr_filtered), 2) if col_mgr_filtered else None,
+        'subordinates': round(sum(sub_mgr_filtered) / len(sub_mgr_filtered), 2) if sub_mgr_filtered else None
+    }
 
     # Cases
     employee_key = normalize_person_key(employee.get('name', ''))
@@ -373,7 +417,7 @@ def merge_reports(self_data: Dict, manager_data: Dict, colleagues_data: Dict, ai
     }
 
     logger.info(f"Обработан сотрудник {employee['name']} (ID: {employee['id']})")
-    logger.debug(f"Soft: {len(soft_labels)}, Hard: {len(hard_labels)}, Кейсов: {len(cases)}")
+    logger.debug(f"Soft: {len(soft_labels)}, Managerial: {len(managerial_labels)}, Кейсов: {len(cases)}")
 
     return {
         'employee': employee,
@@ -388,10 +432,13 @@ def merge_reports(self_data: Dict, manager_data: Dict, colleagues_data: Dict, ai
             'managerDetails': manager_soft  # Используем словарь менеджера для деталей
         },
         'soft_blocks': soft_blocks,
-        'hard_skills': {
-            'labels': hard_labels,
-            'self': self_hard_scores,
-            'manager': manager_hard_scores
+        'managerial_block': managerial_block,
+        'managerial_skills': {
+            'labels': managerial_labels,
+            'self': self_managerial_scores,
+            'manager': manager_managerial_scores,
+            'colleagues': colleagues_managerial_scores,
+            'subordinates': subordinates_managerial_scores
         },
         'cases': cases,
         'manager_open_answers': manager_open_answers,
