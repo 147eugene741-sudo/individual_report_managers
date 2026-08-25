@@ -1,0 +1,3008 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Индивидуальный отчет по итогам оценки: Губенко Даниил</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1, h2, h3 {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        h1 {
+            font-size: 28px;
+            border-bottom: 3px solid #006FFF;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        h2 { font-size: 22px; margin: 30px 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+        h3 { font-size: 18px; margin: 15px 0 8px 0; }
+        .section-spaced {
+            margin-top: 60px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 6px solid #006FFF;
+        }
+        .header .info { line-height: 1.7; }
+        .header .info strong { color: #34495e; }
+        .header .logo {
+            max-height: 50px;
+            max-width: 180px;
+            object-fit: contain;
+        }
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .chart-box {
+            background: #fafbfc;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e9ecef;
+        }
+        .chart-box h2 {
+            border-bottom: none;
+            margin-top: 0;
+            text-align: center;
+            font-weight: 600;
+            color: #34495e;
+        }
+        .chart-box canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 350px;
+        }
+        .legend-row {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .legend-row span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-row .color-box {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            background: #006FFF;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 500;
+        }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        tr:hover { background: #f8f9fa; }
+        .table-block-header {
+            background: #e9ecef;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .table-section-header {
+            background: #e9ecef;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .score-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+        .score-null {
+            color: #adb5bd;
+            font-style: italic;
+        }
+        .discrepancy-icon {
+            display: inline-block;
+            margin-left: 6px;
+            color: #e67e22;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: default;
+        }
+        /* Тултипы для компетенций и блоков */
+        .tooltip-trigger {
+            display: inline-block;
+            position: relative;
+            margin-left: 0;
+        }
+        .tooltip-trigger:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            width: max-content;
+            max-width: 450px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            margin-bottom: 8px;
+            /* Смещение вправо на 20px относительно центра */
+            margin-left: 20px;
+            /* Ограничение по высоте, чтобы не выходил за экран */
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .tooltip-trigger:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2c3e50;
+            margin-bottom: -4px;
+            z-index: 10001;
+            /* Смещение стрелки вправо на 20px, чтобы соответствовать тултипу */
+            margin-left: 20px;
+        }
+        /* Тултипы для таблицы "Детальные оценки по всем компетенциям" - смещены вправо */
+        #section-table .tooltip-trigger:hover::after {
+            left: 100%;
+            transform: translateX(10px);
+            margin-left: 0;
+        }
+        #section-table .tooltip-trigger:hover::before {
+            left: 100%;
+            transform: translateX(-6px);
+            margin-left: 0;
+        }
+        .competency-name {
+            cursor: default;
+        }
+        .instruction-block {
+            background: #e8f4fd;
+            border-left: 5px solid #006FFF;
+            padding: 16px 20px;
+            margin: 15px 0 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a2632;
+        }
+        .instruction-block strong {
+            color: #2c3e50;
+        }
+        .instruction-block ul {
+            margin: 8px 0 0 20px;
+            padding-left: 10px;
+        }
+        .instruction-block ul li {
+            margin-bottom: 4px;
+        }
+        .validation-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 5px solid #e74c3c;
+            display: none;
+        }
+        .validation-message ul {
+            margin: 5px 0 0 20px;
+            padding-left: 10px;
+        }
+        .case-block {
+            background: #f8f9fa;
+            border-left: 5px solid #006FFF;
+            padding: 18px 22px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .case-block .case-title {
+            font-weight: 700;
+            font-size: 17px;
+            color: #2c3e50;
+        }
+        .case-block .case-question {
+            font-weight: 600;
+            margin: 8px 0 4px 0;
+            color: #34495e;
+        }
+        .case-block .case-answer {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 8px 0 14px 0;
+            border: 1px solid #dee2e6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .case-field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 12px;
+            align-items: stretch;
+        }
+        .case-field-grid .comment-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .case-field-grid .comment-col textarea {
+            flex: 1;
+            min-height: 100px;
+        }
+        .case-field-grid .ai-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .case-field-grid .ai-col input,
+        .case-field-grid .ai-col textarea {
+            width: 100%;
+        }
+        .case-field-grid .level-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .case-field-grid label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #34495e;
+        }
+        .case-field-grid textarea,
+        .case-field-grid select,
+        .case-field-grid input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+        }
+        .case-field-grid textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        .case-field-grid input[type="text"][readonly],
+        .case-field-grid textarea[readonly] {
+            background: #f1f3f5;
+            color: #6c757d;
+        }
+        .validation-error {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.3);
+        }
+        .perf-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 30px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .perf-block .full-width {
+            grid-column: 1 / -1;
+        }
+        .perf-block .task-row {
+            display: flex;
+            gap: 20px;
+            grid-column: 1 / -1;
+        }
+        .perf-block .task-row .task-field {
+            flex: 2;
+        }
+        .perf-block .task-row .score-field {
+            flex: 1;
+        }
+        .perf-block label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            margin-bottom: 4px;
+        }
+        .perf-block textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        .perf-block select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+        }
+        .perf-block select[multiple] {
+            height: 120px;
+        }
+        .perf-block .score-select {
+            width: 100%;
+            min-width: 80px;
+        }
+        .perf-block .task-only {
+            grid-column: 1 / -1;
+        }
+        .final-grade-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 30px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .final-grade-block .full-width {
+            grid-column: 1 / -1;
+        }
+        .final-grade-block label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            margin-bottom: 4px;
+        }
+        .final-grade-block select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+        }
+        .final-grade-block textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .save-btn {
+            display: block;
+            margin: 30px auto;
+            background: #006FFF;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(0,111,255,0.3);
+        }
+        .save-btn:hover {
+            background: #0055CC;
+        }
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            padding: 8px 0;
+            border-bottom: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin: 0 -30px 20px -30px;
+            padding: 8px 30px;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 6px;
+            align-items: center;
+            scrollbar-width: thin;
+        }
+        .sticky-nav::-webkit-scrollbar { height: 4px; }
+        .sticky-nav::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .sticky-nav .nav-item {
+            flex: 0 0 auto;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            text-decoration: none;
+            background: transparent;
+        }
+        .sticky-nav .nav-item:hover {
+            background: #e9ecef;
+            color: #1a1a2e;
+        }
+        .sticky-nav .nav-item.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.25);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .summary-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #006FFF;
+            text-align: center;
+        }
+        .summary-item .label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .summary-item .value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+        .summary-item .value.empty {
+            color: #adb5bd;
+            font-weight: 400;
+            font-size: 1.2em;
+        }
+        details summary {
+            cursor: pointer;
+            color: #006FFF;
+            font-weight: 500;
+        }
+        details summary:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+            .perf-block {
+                grid-template-columns: 1fr;
+            }
+            .perf-block .task-row {
+                flex-direction: column;
+            }
+            .final-grade-block {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .header .logo {
+                max-height: 40px;
+            }
+            .sticky-nav {
+                margin: 0 -15px 15px -15px;
+                padding: 8px 15px;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            .case-field-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .case-field-grid .comment-col textarea {
+                min-height: 70px;
+            }
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .sticky-nav { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="reportContainer">
+
+    <div class="header">
+        <div class="info">
+            
+            <img src="data:image/png;base64,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" alt="Логотип компании" class="logo">
+            
+            <h1 style="border: none; margin: 10px 0 0 0; padding: 0; font-size: 22px;">Индивидуальный отчет по итогам оценки</h1>
+            <p><strong>Сотрудник:</strong> Губенко Даниил <span style="color: #6c757d; margin-left: 15px;">ID: 6a6afd7d972e8d808fb159de</span></p>
+            <p><strong>Дата оценки:</strong> 30-07-2026</p>
+        </div>
+    </div>
+
+    <nav class="sticky-nav" id="stickyNav" role="navigation" aria-label="Навигация по отчёту">
+        <button class="nav-item active" data-target="section-charts">Графики</button>
+        <button class="nav-item" data-target="section-recommendations">Выводы</button>
+        <button class="nav-item" data-target="section-table">Таблица оценок</button>
+        <button class="nav-item" data-target="section-cases">Кейсы</button>
+        <button class="nav-item" data-target="section-performance">Оценка цели и задач</button>
+        <button class="nav-item" data-target="section-final">Итоговая оценка</button>
+    </nav>
+
+    <details style="margin-bottom: 20px;">
+        <summary style="color: #006FFF; cursor: pointer; font-weight: 500;">📊 Шкала оценок компетенций</summary>
+        <div class="instruction-block" style="margin-top: 10px;">
+            <strong>Шкала оценок компетенций:</strong>
+            <div class="table-wrap" style="margin: 10px 0 0 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Интервал баллов</th>
+                            <th>Наименование</th>
+                            <th>Описание. Сотрудник демонстрирует…</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>От 1 до 1,25</td>
+                            <td>Ниже требуемого уровня – низкие результаты.</td>
+                            <td>Устойчивый дефицит компетенций/знаний/навыков.</td>
+                        </tr>
+                        <tr>
+                            <td>От 1,25 до 1,75</td>
+                            <td>Уровень поддержки – низкие результаты.</td>
+                            <td>Неструктурированный подход и фрагментарное владение компетенциями/знаниями/навыками.</td>
+                        </tr>
+                        <tr>
+                            <td>От 1,75 до 2,25</td>
+                            <td>Уровень зоны роста – результаты ниже среднего.</td>
+                            <td>Частичное владение компетенциями/знаниями/навыками.</td>
+                        </tr>
+                        <tr>
+                            <td>От 2,25 до 2,75</td>
+                            <td>Уровень потенциала – результаты ниже среднего.</td>
+                            <td>Владение компетенциями/знаниями/навыками на базовом уровне.</td>
+                        </tr>
+                        <tr>
+                            <td>От 2,75 до 3,25</td>
+                            <td>Требуемый уровень – средние результаты.</td>
+                            <td>Владение компетенциями/знаниями/навыками на уровне, достаточном для эффективной работы.</td>
+                        </tr>
+                        <tr>
+                            <td>От 3,25 до 3,75</td>
+                            <td>Выше требуемого уровня – высокие результаты.</td>
+                            <td>Уверенное владение компетенциями/знаниями/навыками.</td>
+                        </tr>
+                        <tr>
+                            <td>От 3,75 до 4</td>
+                            <td>Превосходит ожидания – лучшие результаты.</td>
+                            <td>Выдающийся уровень владения компетенциями/знаниями/навыками.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <section id="section-charts">
+        <div class="charts-row">
+            <div class="chart-box">
+                <h2>Hard компетенции</h2>
+                <canvas id="hardChart"></canvas>
+                <div class="legend-row">
+                    <span><span class="color-box" style="background:#006FFF;"></span> Самооценка</span>
+                    <span><span class="color-box" style="background:#FF310C;"></span> Руководитель</span>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h2>Soft компетенции</h2>
+                <canvas id="softBlockChart"></canvas>
+                <div class="legend-row">
+                    <span><span class="color-box" style="background:#006FFF;"></span> Самооценка</span>
+                    <span><span class="color-box" style="background:#FF310C;"></span> Руководитель</span>
+                    <span><span class="color-box" style="background:#50E3C2;"></span> Коллеги</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="section-recommendations">
+        <h2>Выводы по soft компетенциям</h2>
+        <div class="instruction-block" style="background: #fff8e6; border-left-color: #f39c12;">
+            <strong>Выводы:</strong>
+            <ol style="margin: 10px 0 0 20px; padding-left: 10px; line-height: 1.8;">
+                
+                <li><strong>Самооценка:</strong> Сотрудник оценивает свой уровень soft-компетенций как выше требуемого уровня.</li>
+                
+                
+                <li><strong>Оценка коллег:</strong> В целом уровень soft-компетенций, по оценке коллег, почти достигает требуемого уровня.</li>
+                
+                
+                <li><strong>Оценка руководителя:</strong> В целом уровень soft-компетенций, по оценке руководителя, почти достигает требуемого уровня.</li>
+                
+                
+            </ol>
+        </div>
+        
+        
+        <div class="instruction-block" style="background: #fff8e6; border-left-color: #f39c12; margin-top: 15px;">
+            <strong>Поведенческие паттерны:</strong>
+            <ol style="margin: 10px 0 0 20px; padding-left: 10px; line-height: 1.8;">
+                
+                <li><strong>Личная эффективность и исполнение:</strong> Сотрудник демонстрирует базовую самоорганизацию: самостоятельно ставит цели, планирует и контролирует себя в стандартных ситуациях, однако под сильным давлением может терять самообладание, при этом показывать гарантированный результат при обычной нагрузке.</li>
+                
+                <li><strong>Мышление и принятие решений:</strong> Сотрудник демонстрирует базовую системность: анализирует стандартные ситуации, видит основные взаимосвязи, принимает взвешенные решения в знакомом контексте, однако в новых условиях может действовать шаблонно.</li>
+                
+                <li><strong>Лидерство и развитие команды:</strong> Сотрудник демонстрирует базовый уровень лидерства: берёт ответственность за свои задачи, инициирует небольшие улучшения, наставляет новичков в рамках своих компетенций, однако не проявляет инициативы в развитии команды в целом.</li>
+                
+            </ol>
+        </div>
+        
+    </section>
+    
+
+    <section id="section-table" class="section-spaced">
+        <h2>Детальные оценки по всем компетенциям</h2>
+        
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Компетенция / Блок</th>
+                        <th style="text-align:center;">Самооценка</th>
+                        <th style="text-align:center;">Руководитель</th>
+                        <th style="text-align:center;">Коллеги</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    
+                    
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                    
+                    
+                    
+
+                    <tr class="table-section-header">
+                        <td><strong>Soft компетенции</strong></td>
+                        <td class="score-cell">
+                            3.45
+                        </td>
+                        <td class="score-cell">
+                            2.45
+                        </td>
+                        <td class="score-cell">
+                            2.55
+                        </td>
+                    </tr>
+
+                    
+                    <tr class="table-block-header">
+                        <td><strong>Личная эффективность и исполнение</strong></td>
+                        <td class="score-cell">
+                            4.0
+                        </td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Выполняет работу с высокой точностью, замечает ошибки и несоответствия до того, как они повлияют на результат, не жертвует качеством ради скорости.">Внимание к качеству и деталям</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Действует на опережение /предлагает улучшения/пересматривает текущие процессы в случае их неэффективности, самостоятельно решает проблемы и запускает нужные процессы.">Инициативность и проактивность</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Берет на себя ответственность за результат своих задач, включая ошибки. Сообщает коллегам/руководителю о потенциальных рисках.">Ответственность</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            1
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Сохраняет продуктивность, эмоциональную стабильность и качество решений в условиях давления и сжатых сроков.">Стрессоустойчивость</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Ставит чёткие цели, фокусируется на приоритетах и доводит работу до измеримого результата в срок, несмотря на препятствия.">Ориентация на результат</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Реалистично планирует работу, распределяет время и ресурсы, соблюдает сроки и адекватно оценивает трудоёмкость задач.">Планирование и тайм-менеджмент</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr class="table-block-header">
+                        <td><strong>Лидерство и развитие команды</strong></td>
+                        <td class="score-cell">
+                            2.75
+                        </td>
+                        <td class="score-cell">
+                            2.67
+                        </td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Передает задачи и полномочия другим, соразмерно их уровню готовности, не прибегая к микроменеджменту.">Делегирование</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Способствует созданию среды, в которой люди могут открыто высказывать разные точки зрения, рассматривает противоположные мнения.">Открытость мнениям</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Ведет команду к результату через личный пример и, создает культуру доверия, разделяя успех и неудачи команды, снижает сопротивление и сохраняет вовлеченность, внушает уверенность другим.">Вдохновляющее лидерство</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            <span class="score-null">—</span>
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Способствует профессиональному росту коллег через обратную связь, помогает выявить потребности и делится опытом.">Развитие других</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr class="table-block-header">
+                        <td><strong>Мышление и принятие решений</strong></td>
+                        <td class="score-cell">
+                            3.83
+                        </td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Предлагает нестандартные идеи и решения, выходящие за рамки привычных подходов.">Креативность и инновационность</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Корректно интерпретирует данные/информацию, обосновывает предложения/решения подтвержденными фактами, а не только интуицией.">Интерпретация данных</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Принимает взвешенные и своевременные решения, рассматривает варианты, учитывает последствия, адаптирует решения и действия к новым обстоятельствам.">Принятие решений в условиях неопределенности</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            1
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Любознателен, легко осваивает новое, учится на опыте, извлекает уроки из успехов и неудач, успешно применяет приобретенные навыки.">Обучаемость и гибкость</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            1
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Понимает, как работа влияет на бизнес-результат компании (деньги, метрики, ч/ч, отношение клиента) и принимает/предлагает решения с учетом этого контекста и стратегии компании.">Бизнес-мышление</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Комплексно видит проблему, устанавливает причинно-следственные связи, использует данные и структурированный подход при принятии решений, в том числе в долгосрочной перспективе.">Системное мышление и анализ</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr class="table-block-header">
+                        <td><strong>Взаимодействие и коммуникация</strong></td>
+                        <td class="score-cell">
+                            3.0
+                        </td>
+                        <td class="score-cell">
+                            2.2
+                        </td>
+                        <td class="score-cell">
+                            2.67
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Выявляет и разрешает разногласия, не допуская их эскалации или замалчивая, может найти решение, приемлемое для всех сторон.">Управление конфликтами</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            1
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Выстраивает и поддерживает полезные рабочие связи за пределами своей прямой команды, создавая доверие для будущего сотрудничества между командами/отделами/подразделениями/компаниями.">Нетворкинг</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            <span class="score-null">—</span>
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Ясно и убедительно доносит мысли устно и письменно, слушает и воспринимает точку зрения собеседника.">Эффективная коммуникация</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            4
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Понимает/предлагает/ставит задачи исходя из потребностей внутреннего и/или внешнего клиента. Выстраивает с клиентами продуктивные и долгосрочные взаимоотношения.">Клиентоориентированность</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Убедительно продвигает идеи и добивается согласия других людей и команд без формальных полномочий над ними.">Влияние на других</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    
+                    <tr>
+                        <td style="padding-left: 25px;">
+                            <span class="competency-name tooltip-trigger" data-tooltip="Стремится выстраивать процессы с другими командами при необходимости. Выстраивает процессы с другими командами и функциями для достижения общих целей.">Кросс-функциональное взаимодействие</span>
+                            
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                    </tr>
+                    
+                    
+
+                    
+                    
+                    
+                    
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                        
+                            
+                        
+                        
+                            
+                        
+                    
+                    
+                    
+
+                    <tr class="table-section-header">
+                        <td><strong>Hard компетенции</strong></td>
+                        <td class="score-cell">
+                            2.5
+                        </td>
+                        <td class="score-cell">
+                            2.0
+                        </td>
+                        <td class="score-cell">—</td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    <tr>
+                        <td>
+                            Recruitingprof навыки
+                            
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">—</td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                        
+                    
+                    
+                    <tr>
+                        <td>
+                            Recruitingprof теория
+                            
+                        </td>
+                        <td class="score-cell">
+                            3
+                        </td>
+                        <td class="score-cell">
+                            2
+                        </td>
+                        <td class="score-cell">—</td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="section-cases" class="section-spaced">
+        <h2>Кейсы (ответы сотрудника)</h2>
+
+        <div class="instruction-block">
+            <strong>Инструкция:</strong>
+            <ul>
+                <li><strong>Внимательно прочитайте условие кейса.</strong> Определите:
+                    <ul>
+                        <li>Какая существует проблема?</li>
+                        <li>Какие профессиональные знания и навыки нужны для решения кейса?</li>
+                        <li>Каков был бы "идеальный" ответ?</li>
+                    </ul>
+                </li>
+                <li><strong>Прочитайте ответ сотрудника.</strong> Выделите в нем:
+                    <ul>
+                        <li>Действия, которые он(а) предлагает или описывает.</li>
+                        <li>Логику рассуждений и аргументацию.</li>
+                        <li>Чего не хватает в ответе (упущенные риски, отсутствие структуры и т.п.)?</li>
+                    </ul>
+                </li>
+                <li><strong>Посмотрите на присужденную оценку.</strong> Используйте её как точку отсчета. Если вы не согласны, поставьте свою, но аргументируйте в комментарии.</li>
+                <li><strong>Присвойте свою оценку.</strong>
+                    <ul>
+                        <li>Выберите из выпадающего списка "уровень ответа".</li>
+                        <li>Напишите комментарий к присужденному уровню.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        
+        <div class="case-block">
+            <div class="case-title">PEC-01: Срочный найм</div>
+            <div class="case-question">Вопрос:</div>
+            <div style="background:#e3f2fd; padding:10px 14px; border-radius:6px; margin:4px 0 10px 0;">Вопрос: (PEC-01) В команде срочно открылась ключевая вакансия. Бизнес-процессы страдают из-за нехватки специалиста. Нужно закрыть позицию в максимально сжатые сроки.|Case_Title >> Срочный найм</div>
+            <div class="case-question">Ответ сотрудника:</div>
+            <div class="case-answer">1) отвечаю на вопросы, всегда отвечаю как руководитель</div>
+
+            <div class="case-field-grid">
+                <div class="comment-col">
+                    <label for="case_PEC-01_comment">Комментарий руководителя:</label>
+                    <textarea id="case_PEC-01_comment" data-field="case_PEC-01_comment"></textarea>
+                </div>
+                <div class="ai-col">
+                    <div>
+                        <label for="case_PEC-01_ai_score">Оценка AI (Класс поведения):</label>
+                        <input type="text" id="case_PEC-01_ai_score" data-field="case_PEC-01_ai_score" readonly value="Middle_Behavior" placeholder="—">
+                    </div>
+                    <div>
+                        <label for="case_PEC-01_positive_patterns">Позитивные паттерны:</label>
+                        <textarea id="case_PEC-01_positive_patterns" data-field="case_PEC-01_positive_patterns" readonly rows="2" style="min-height: 40px;">Открытая коммуникация; Ориентация на результат</textarea>
+                    </div>
+                </div>
+                <div class="level-col">
+                    <label for="case_PEC-01_level">Уровень ответа (руководитель):</label>
+                    <select id="case_PEC-01_level" data-field="case_PEC-01_level">
+                        <option value="">-- выберите --</option>
+                        <option value="Junior-">Junior- (Начинающий -)</option>
+                        <option value="Junior">Junior (Начинающий)</option>
+                        <option value="Junior+">Junior+ (Опытный джун)</option>
+                        <option value="Middle-">Middle- (Развивающийся)</option>
+                        <option value="Middle" >Middle (Самостоятельный)</option>
+                        <option value="Middle+">Middle+ (Сильный мидл)</option>
+                        <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                        <option value="Senior">Senior (Эксперт)</option>
+                        <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                        <option value="Lead">Lead (Лидер направления)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="case-block">
+            <div class="case-title">PEC-02: Ошибка найма</div>
+            <div class="case-question">Вопрос:</div>
+            <div style="background:#e3f2fd; padding:10px 14px; border-radius:6px; margin:4px 0 10px 0;">Вопрос: (PEC-02) Новый сотрудник, принятый месяц назад, не справляется с задачами своего уровня, несмотря на поддержку команды.|Case_Title >> Ошибка найма</div>
+            <div class="case-question">Ответ сотрудника:</div>
+            <div class="case-answer">1) ну, помянем</div>
+
+            <div class="case-field-grid">
+                <div class="comment-col">
+                    <label for="case_PEC-02_comment">Комментарий руководителя:</label>
+                    <textarea id="case_PEC-02_comment" data-field="case_PEC-02_comment"></textarea>
+                </div>
+                <div class="ai-col">
+                    <div>
+                        <label for="case_PEC-02_ai_score">Оценка AI (Класс поведения):</label>
+                        <input type="text" id="case_PEC-02_ai_score" data-field="case_PEC-02_ai_score" readonly value="Middle_Behavior" placeholder="—">
+                    </div>
+                    <div>
+                        <label for="case_PEC-02_positive_patterns">Позитивные паттерны:</label>
+                        <textarea id="case_PEC-02_positive_patterns" data-field="case_PEC-02_positive_patterns" readonly rows="2" style="min-height: 40px;">Структурированное мышление</textarea>
+                    </div>
+                </div>
+                <div class="level-col">
+                    <label for="case_PEC-02_level">Уровень ответа (руководитель):</label>
+                    <select id="case_PEC-02_level" data-field="case_PEC-02_level">
+                        <option value="">-- выберите --</option>
+                        <option value="Junior-">Junior- (Начинающий -)</option>
+                        <option value="Junior">Junior (Начинающий)</option>
+                        <option value="Junior+">Junior+ (Опытный джун)</option>
+                        <option value="Middle-">Middle- (Развивающийся)</option>
+                        <option value="Middle" >Middle (Самостоятельный)</option>
+                        <option value="Middle+">Middle+ (Сильный мидл)</option>
+                        <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                        <option value="Senior">Senior (Эксперт)</option>
+                        <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                        <option value="Lead">Lead (Лидер направления)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="case-block">
+            <div class="case-title">PEC-03: Конфликт культурных ценностей</div>
+            <div class="case-question">Вопрос:</div>
+            <div style="background:#e3f2fd; padding:10px 14px; border-radius:6px; margin:4px 0 10px 0;">Вопрос: (PEC-03) Кандидат технически силён, но демонстрирует токсичное поведение на собеседовании (пренебрежительно отзывается о бывших коллегах, хамит).|Case_Title >> Конфликт культурных ценностей</div>
+            <div class="case-question">Ответ сотрудника:</div>
+            <div class="case-answer">1) ....../</div>
+
+            <div class="case-field-grid">
+                <div class="comment-col">
+                    <label for="case_PEC-03_comment">Комментарий руководителя:</label>
+                    <textarea id="case_PEC-03_comment" data-field="case_PEC-03_comment"></textarea>
+                </div>
+                <div class="ai-col">
+                    <div>
+                        <label for="case_PEC-03_ai_score">Оценка AI (Класс поведения):</label>
+                        <input type="text" id="case_PEC-03_ai_score" data-field="case_PEC-03_ai_score" readonly value="Middle_Behavior" placeholder="—">
+                    </div>
+                    <div>
+                        <label for="case_PEC-03_positive_patterns">Позитивные паттерны:</label>
+                        <textarea id="case_PEC-03_positive_patterns" data-field="case_PEC-03_positive_patterns" readonly rows="2" style="min-height: 40px;">Эффективная приоритизация; Рациональное распределение ресурсов</textarea>
+                    </div>
+                </div>
+                <div class="level-col">
+                    <label for="case_PEC-03_level">Уровень ответа (руководитель):</label>
+                    <select id="case_PEC-03_level" data-field="case_PEC-03_level">
+                        <option value="">-- выберите --</option>
+                        <option value="Junior-">Junior- (Начинающий -)</option>
+                        <option value="Junior">Junior (Начинающий)</option>
+                        <option value="Junior+">Junior+ (Опытный джун)</option>
+                        <option value="Middle-">Middle- (Развивающийся)</option>
+                        <option value="Middle" >Middle (Самостоятельный)</option>
+                        <option value="Middle+">Middle+ (Сильный мидл)</option>
+                        <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                        <option value="Senior">Senior (Эксперт)</option>
+                        <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                        <option value="Lead">Lead (Лидер направления)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="case-block">
+            <div class="case-title">PEC-06: Неэффективный онбординг</div>
+            <div class="case-question">Вопрос:</div>
+            <div style="background:#e3f2fd; padding:10px 14px; border-radius:6px; margin:4px 0 10px 0;">Вопрос: (PEC-06) Новый сотрудник через неделю работы всё ещё теряется, не понимает процессов и не знает, к кому обратиться за помощью.|Case_Title >> Неэффективный онбординг</div>
+            <div class="case-question">Ответ сотрудника:</div>
+            <div class="case-answer">1) ПОЛНЫЙ ОТВЕТ НА ВОПРОС</div>
+
+            <div class="case-field-grid">
+                <div class="comment-col">
+                    <label for="case_PEC-06_comment">Комментарий руководителя:</label>
+                    <textarea id="case_PEC-06_comment" data-field="case_PEC-06_comment"></textarea>
+                </div>
+                <div class="ai-col">
+                    <div>
+                        <label for="case_PEC-06_ai_score">Оценка AI (Класс поведения):</label>
+                        <input type="text" id="case_PEC-06_ai_score" data-field="case_PEC-06_ai_score" readonly value="Middle_Behavior" placeholder="—">
+                    </div>
+                    <div>
+                        <label for="case_PEC-06_positive_patterns">Позитивные паттерны:</label>
+                        <textarea id="case_PEC-06_positive_patterns" data-field="case_PEC-06_positive_patterns" readonly rows="2" style="min-height: 40px;">Командная работа; Открытая коммуникация</textarea>
+                    </div>
+                </div>
+                <div class="level-col">
+                    <label for="case_PEC-06_level">Уровень ответа (руководитель):</label>
+                    <select id="case_PEC-06_level" data-field="case_PEC-06_level">
+                        <option value="">-- выберите --</option>
+                        <option value="Junior-">Junior- (Начинающий -)</option>
+                        <option value="Junior">Junior (Начинающий)</option>
+                        <option value="Junior+">Junior+ (Опытный джун)</option>
+                        <option value="Middle-">Middle- (Развивающийся)</option>
+                        <option value="Middle" >Middle (Самостоятельный)</option>
+                        <option value="Middle+">Middle+ (Сильный мидл)</option>
+                        <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                        <option value="Senior">Senior (Эксперт)</option>
+                        <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                        <option value="Lead">Lead (Лидер направления)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="case-block">
+            <div class="case-title">PEC-04: Массовый найм</div>
+            <div class="case-question">Вопрос:</div>
+            <div style="background:#e3f2fd; padding:10px 14px; border-radius:6px; margin:4px 0 10px 0;">Вопрос: (PEC-04) Компания открывает новый офис и нужно нанять 50 сотрудников за 3 месяца.|Case_Title >> Массовый найм</div>
+            <div class="case-question">Ответ сотрудника:</div>
+            <div class="case-answer">1)      ПРОБЕЛЫ ПЕРЕД ТЕКСТОМ</div>
+
+            <div class="case-field-grid">
+                <div class="comment-col">
+                    <label for="case_PEC-04_comment">Комментарий руководителя:</label>
+                    <textarea id="case_PEC-04_comment" data-field="case_PEC-04_comment"></textarea>
+                </div>
+                <div class="ai-col">
+                    <div>
+                        <label for="case_PEC-04_ai_score">Оценка AI (Класс поведения):</label>
+                        <input type="text" id="case_PEC-04_ai_score" data-field="case_PEC-04_ai_score" readonly value="Middle_Behavior" placeholder="—">
+                    </div>
+                    <div>
+                        <label for="case_PEC-04_positive_patterns">Позитивные паттерны:</label>
+                        <textarea id="case_PEC-04_positive_patterns" data-field="case_PEC-04_positive_patterns" readonly rows="2" style="min-height: 40px;">Структурированное мышление</textarea>
+                    </div>
+                </div>
+                <div class="level-col">
+                    <label for="case_PEC-04_level">Уровень ответа (руководитель):</label>
+                    <select id="case_PEC-04_level" data-field="case_PEC-04_level">
+                        <option value="">-- выберите --</option>
+                        <option value="Junior-">Junior- (Начинающий -)</option>
+                        <option value="Junior">Junior (Начинающий)</option>
+                        <option value="Junior+">Junior+ (Опытный джун)</option>
+                        <option value="Middle-">Middle- (Развивающийся)</option>
+                        <option value="Middle" >Middle (Самостоятельный)</option>
+                        <option value="Middle+">Middle+ (Сильный мидл)</option>
+                        <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                        <option value="Senior">Senior (Эксперт)</option>
+                        <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                        <option value="Lead">Lead (Лидер направления)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+
+    <section id="section-performance" class="section-spaced">
+        <h2>Оценка цели и задач</h2>
+
+        <!-- ОБНОВЛЁННАЯ ИНСТРУКЦИЯ -->
+        <div class="instruction-block">
+            <strong>Инструкция:</strong>
+            <ul>
+                <li><strong>Текущие цели и задачи:</strong>
+                    <ul>
+                        <li>Напишите текущую цель сотрудника, выполнение которой помогает выполнению цели отдела/направления/команды (цель за 6 месяцев).</li>
+                        <li>Напишите основные задачи, которые ведут к цели.</li>
+                        <li>Оцените общее выполнение задач по шкале от 1 до 10.</li>
+                    </ul>
+                </li>
+                <li><strong>Цели и задачи на следующие 6 месяцев:</strong>
+                    <ul>
+                        <li>Напишите одну цель сотрудника на следующие 6 месяцев.</li>
+                        <li>Сформулируйте задачи для её достижения.</li>
+                        <li><em>(Оценка будет проводиться в следующем цикле.)</em></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="perf-block">
+            <div class="full-width">
+                <label for="perform_rating">Оценка выполнения целей и задач (1-4):</label>
+                <select id="perform_rating" data-field="perform_rating">
+                    <option value="">-- выберите --</option>
+                    <option value="1" >1 - Неудовлетворительно</option>
+                    <option value="2" >2 - Ниже ожиданий</option>
+                    <option value="3" >3 - Соответствует ожиданиям</option>
+                    <option value="4" >4 - Превосходит ожидания</option>
+                </select>
+            </div>
+
+            <div class="full-width">
+                <label for="strengths">Сильные стороны:</label>
+                <textarea id="strengths" data-field="strengths"></textarea>
+            </div>
+
+            <div class="full-width">
+                <label for="weaknesses">Зоны роста:</label>
+                <textarea id="weaknesses" data-field="weaknesses"></textarea>
+            </div>
+
+            <div class="full-width">
+                <label for="goals_current">Текущая цель:</label>
+                <textarea id="goals_current" data-field="goals_current"></textarea>
+            </div>
+
+            <div class="task-row">
+                <div class="task-field">
+                    <label for="current_task">Основные задачи:</label>
+                    <textarea id="current_task" data-field="current_task"></textarea>
+                </div>
+                <div class="score-field">
+                    <label for="current_task_score">Оценка выполнения (1–10):</label>
+                    <select id="current_task_score" class="score-select" data-field="current_task_score">
+                        <option value="">--</option>
+                        
+                        <option value="1" >1</option>
+                        
+                        <option value="2" >2</option>
+                        
+                        <option value="3" >3</option>
+                        
+                        <option value="4" >4</option>
+                        
+                        <option value="5" >5</option>
+                        
+                        <option value="6" >6</option>
+                        
+                        <option value="7" >7</option>
+                        
+                        <option value="8" >8</option>
+                        
+                        <option value="9" >9</option>
+                        
+                        <option value="10" >10</option>
+                        
+                    </select>
+                    <details style="margin-top: 8px; font-size: 0.85em; cursor: pointer;">
+                        <summary style="color: #006FFF;">📊 Расшифровка оценки</summary>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 0.9em; border: 1px solid #dee2e6;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9em;">
+                                <thead><tr><th>Баллы</th><th>Статус задачи</th><th>Краткая суть</th></tr></thead>
+                                <tbody>
+                                    <tr><td>1 – 3</td><td>Неудовлетворительно</td><td>Работа не сделана или сделана плохо. Требует вмешательства и переучивания.</td></tr>
+                                    <tr><td>4</td><td>На грани / Слабо</td><td>Делает по минимуму, нужны постоянные напоминания и проверки.</td></tr>
+                                    <tr><td>5 – 6</td><td>Норма (Базовый уровень)</td><td>Делает то, что должен, в срок и качественно. Стабильный «движок» компании.</td></tr>
+                                    <tr><td>7 – 8</td><td>Отлично / Превосходно</td><td>Делает больше, чем просят. Инициативен, самостоятелен, помогает другим.</td></tr>
+                                    <tr><td>9 – 10</td><td>Выдающийся / Эталон</td><td>Задает стандарты, инноватор, стратегический актив компании.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="full-width">
+                <label for="goal_future">Цель на следующие 6 месяцев:</label>
+                <textarea id="goal_future" data-field="goal_future"></textarea>
+            </div>
+
+            <div class="task-only">
+                <label for="future_task">Задачи на следующие 6 месяцев:</label>
+                <textarea id="future_task" data-field="future_task"></textarea>
+            </div>
+        </div>
+    </section>
+
+    <section id="section-final" class="section-spaced">
+        <h2>Итоговая оценка</h2>
+
+        <div class="instruction-block">
+            <strong>Инструкция:</strong>
+            <ul>
+                <li>На основе результатов выполнения текущих задач, присвойте итоговый грейд сотруднику.</li>
+                <li><strong>Важно:</strong> Обязательно напишите обоснование для грейда.</li>
+            </ul>
+        </div>
+
+        <div class="summary-grid" id="summaryGrid">
+            <div class="summary-item">
+                <div class="label">Оценка AI (по кейсам)</div>
+                <div class="value" id="aiGradeValue">—</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Оценка руководителя (по кейсам)</div>
+                <div class="value" id="managerGradeValue">—</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Оценка руководителя (по задачам)</div>
+                <div class="value" id="taskScoreValue">—</div>
+            </div>
+        </div>
+
+        <div class="final-grade-block">
+            <div>
+                <label for="final_grade">Итоговый грейд (руководитель):</label>
+                <select id="final_grade" data-field="final_grade">
+                    <option value="">-- выберите --</option>
+                    <option value="Junior-">Junior- (Начинающий -)</option>
+                    <option value="Junior">Junior (Начинающий)</option>
+                    <option value="Junior+">Junior+ (Опытный джун)</option>
+                    <option value="Middle-">Middle- (Развивающийся)</option>
+                    <option value="Middle" >Middle (Самостоятельный)</option>
+                    <option value="Middle+">Middle+ (Сильный мидл)</option>
+                    <option value="Senior-">Senior- (Развивающийся сеньор)</option>
+                    <option value="Senior">Senior (Эксперт)</option>
+                    <option value="Senior+">Senior+ (Ведущий эксперт)</option>
+                    <option value="Lead">Lead (Лидер направления)</option>
+                </select>
+            </div>
+            <div class="full-width">
+                <label for="final_justification">Обоснование грейда:</label>
+                <textarea id="final_justification" data-field="final_justification"></textarea>
+            </div>
+        </div>
+    </section>
+
+    <div id="validationMessage" class="validation-message">
+        <strong>⚠️ Для сохранения необходимо заполнить все обязательные поля:</strong>
+        <ul id="validationList"></ul>
+    </div>
+
+    <button class="save-btn no-print" onclick="validateAndSave()">Сохранить изменения и скачать</button>
+    <div class="footer">Отчёт сгенерирован автоматически. Все поля обязательны для заполнения.</div>
+</div>
+
+<!-- Передаём данные в JavaScript через window объекты -->
+<script>
+    window.REPORT_EMPLOYEE_NAME = "\u0413\u0443\u0431\u0435\u043d\u043a\u043e \u0414\u0430\u043d\u0438\u0438\u043b";
+    window.REPORT_EMPLOYEE_ID = "6a6afd7d972e8d808fb159de";
+    window.REPORT_CASE_IDS = ["PEC-01", "PEC-02", "PEC-03", "PEC-06", "PEC-04"];
+    window.REPORT_HARD_LABELS = ["recruitingprof \u043d\u0430\u0432\u044b\u043a\u0438", "recruitingprof \u0442\u0435\u043e\u0440\u0438\u044f"];
+    window.REPORT_HARD_SELF = [2, 3];
+    window.REPORT_HARD_MANAGER = [2, 2];
+    window.REPORT_BLOCK_LABELS = ["\u041b\u0438\u0447\u043d\u0430\u044f \u044d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c \u0438 \u0438\u0441\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435", "\u041b\u0438\u0434\u0435\u0440\u0441\u0442\u0432\u043e \u0438 \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u0435 \u043a\u043e\u043c\u0430\u043d\u0434\u044b", "\u041c\u044b\u0448\u043b\u0435\u043d\u0438\u0435 \u0438 \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u0439", "\u0412\u0437\u0430\u0438\u043c\u043e\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0438 \u043a\u043e\u043c\u043c\u0443\u043d\u0438\u043a\u0430\u0446\u0438\u044f"];
+    window.REPORT_BLOCK_SELF = [4.0, 2.75, 3.83, 3.0];
+    window.REPORT_BLOCK_MANAGER = [2.5, 2.67, 2.5, 2.2];
+    window.REPORT_BLOCK_COLLEAGUES = [2.5, 2.5, 2.5, 2.67];
+</script>
+
+<!-- Встраиваем JavaScript код напрямую для работы без HTTP-сервера -->
+<script>
+// Индивидуальный отчёт - клиентская логика
+
+const REPORT_META = {
+    employeeName: window.REPORT_EMPLOYEE_NAME || '',
+    employeeId: window.REPORT_EMPLOYEE_ID || '',
+    schemaVersion: 'individual_review_v1',
+    caseIds: window.REPORT_CASE_IDS || []
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверка доступности Chart.js
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js не загружен!');
+        return;
+    }
+
+    const hardLabels = window.REPORT_HARD_LABELS || [];
+    const hardSelf = window.REPORT_HARD_SELF || [];
+    const hardManager = window.REPORT_HARD_MANAGER || [];
+
+    const blockLabels = window.REPORT_BLOCK_LABELS || [];
+    const blockSelf = window.REPORT_BLOCK_SELF || [];
+    const blockManager = window.REPORT_BLOCK_MANAGER || [];
+    const blockColleagues = window.REPORT_BLOCK_COLLEAGUES || [];
+
+    function nullToUndefined(arr) {
+        return arr.map(v => (v === null ? undefined : v));
+    }
+
+    // Инициализация графика Hard компетенции
+    const hardChartEl = document.getElementById('hardChart');
+    if (hardChartEl && hardLabels && hardLabels.length > 0) {
+        const ctxHard = hardChartEl.getContext('2d');
+        new Chart(ctxHard, {
+            type: 'bar',
+            data: {
+                labels: hardLabels,
+                datasets: [
+                    {
+                        label: 'Самооценка',
+                        data: nullToUndefined(hardSelf),
+                        backgroundColor: '#006FFF',
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                    },
+                    {
+                        label: 'Руководитель',
+                        data: nullToUndefined(hardManager),
+                        backgroundColor: '#FF310C',
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + (context.parsed.y || '—');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: { stepSize: 1, display: false },
+                        grid: { display: false },
+                        title: { display: false }
+                    },
+                    x: {
+                        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    } else {
+        console.warn('Hard компетенции график не создан: нет данных или элемента canvas');
+    }
+
+    // Инициализация графика Soft компетенции по блокам
+    const softChartEl = document.getElementById('softBlockChart');
+    if (softChartEl && blockLabels && blockLabels.length > 0) {
+        const ctxSoft = softChartEl.getContext('2d');
+        new Chart(ctxSoft, {
+            type: 'radar',
+            data: {
+                labels: blockLabels,
+                datasets: [
+                    {
+                        label: 'Самооценка',
+                        data: nullToUndefined(blockSelf),
+                        borderColor: '#006FFF',
+                        backgroundColor: 'rgba(0, 111, 255, 0.1)',
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2,
+                        tension: 0.4,
+                    },
+                    {
+                        label: 'Руководитель',
+                        data: nullToUndefined(blockManager),
+                        borderColor: '#FF310C',
+                        backgroundColor: 'rgba(255, 49, 12, 0.1)',
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2,
+                        tension: 0.4,
+                    },
+                    {
+                        label: 'Коллеги',
+                        data: nullToUndefined(blockColleagues),
+                        borderColor: '#28C847',
+                        backgroundColor: 'rgba(40, 200, 71, 0.1)',
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2,
+                        tension: 0.4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + (context.parsed.r || '—');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            backdropColor: 'transparent',
+                            showLabelBackdrop: false,
+                            display: false
+                        },
+                        grid: { display: false },
+                        pointLabels: {
+                            font: { size: 11, weight: '600' },
+                            centerPointLabels: true,
+                            display: true,
+                            color: '#2c3e50'
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.warn('Soft компетенции график не создан: нет данных или элемента canvas');
+    }
+
+    // Заполнение полей данными из JSON
+    const employeeName = document.getElementById('employeeName');
+    const employeePosition = document.getElementById('employeePosition');
+    const employeeDepartment = document.getElementById('employeeDepartment');
+    const employeeHireDate = document.getElementById('employeeHireDate');
+
+    if (employeeName) employeeName.textContent = REPORT_META.employeeName;
+    if (employeePosition) employeePosition.textContent = '';
+    if (employeeDepartment) employeeDepartment.textContent = '';
+    if (employeeHireDate) employeeHireDate.textContent = '';
+
+    function computeMode(values) {
+        // Вычисляет моду (наиболее часто встречающееся значение) среди непустых значений
+        if (!values || values.length === 0) return null;
+        const frequency = {};
+        let maxFreq = 0;
+        let mode = null;
+        values.forEach(val => {
+            if (!val || val.trim() === '') return;
+            const trimmed = val.trim();
+            frequency[trimmed] = (frequency[trimmed] || 0) + 1;
+            if (frequency[trimmed] > maxFreq) {
+                maxFreq = frequency[trimmed];
+                mode = trimmed;
+            }
+        });
+        return mode;
+    }
+
+    function computeGradeFromLevels(levels) {
+        let total = 0;
+        let count = 0;
+        levels.forEach(level => {
+            if (!level) return;
+            let base = '';
+            if (level.startsWith('Junior')) base = 'Junior';
+            else if (level.startsWith('Middle')) base = 'Middle';
+            else if (level.startsWith('Senior') || level === 'Lead') base = 'Senior';
+            if (base === 'Junior') total += 1;
+            else if (base === 'Middle') total += 2;
+            else if (base === 'Senior') total += 3;
+            count++;
+        });
+        if (count === 0) return null;
+        if (total >= 12) return 'Senior';
+        else if (total >= 8) return 'Middle';
+        else if (total >= 5) return 'Junior';
+        else return null;
+    }
+
+    function updateSummary() {
+        // Расчёт сводной AI-оценки как моды (наиболее частое значение)
+        const aiInputs = document.querySelectorAll('[id$="_ai_score"]');
+        const aiLevels = [];
+        aiInputs.forEach(inp => {
+            const val = inp.value.trim();
+            if (val) aiLevels.push(val);
+        });
+        const aiGrade = computeMode(aiLevels);
+        document.getElementById('aiGradeValue').textContent = aiGrade || '—';
+
+        // Расчёт оценки руководителя по кейсам (среднее значение)
+        const levelSelects = document.querySelectorAll('select[id$="_level"]');
+        const mgrLevels = [];
+        levelSelects.forEach(sel => {
+            const val = sel.value;
+            if (val) mgrLevels.push(val);
+        });
+        const mgrGrade = computeGradeFromLevels(mgrLevels);
+        document.getElementById('managerGradeValue').textContent = mgrGrade || '—';
+
+        // Оценка руководителя по задачам (берётся из выпадающего списка)
+        const taskScoreSelect = document.getElementById('current_task_score');
+        const taskScore = taskScoreSelect ? taskScoreSelect.value : '';
+        document.getElementById('taskScoreValue').textContent = taskScore || '—';
+    }
+
+    // Вызываем updateSummary для расчёта оценок на основе данных кейсов
+    updateSummary();
+
+    // Добавляем обработчики событий для автоматического пересчёта итоговых оценок
+    // При изменении полей AI-оценок
+    document.querySelectorAll('[id$="_ai_score"]').forEach(inp => {
+        inp.addEventListener('input', updateSummary);
+    });
+    
+    // При изменении уровней ответа руководителем
+    document.querySelectorAll('select[id$="_level"]').forEach(sel => {
+        sel.addEventListener('change', updateSummary);
+    });
+    
+    // При изменении оценки выполнения задач
+    const taskScoreSelect = document.getElementById('current_task_score');
+    if (taskScoreSelect) {
+        taskScoreSelect.addEventListener('change', updateSummary);
+    }
+
+    // Заполнение текстовых полей
+    const textFields = {
+        'strengths': '',
+        'weaknesses': '',
+        'goals_current': '',
+        'goal_future': '',
+        'future_task': '',
+        'final_justification': ''
+    };
+
+    // Навигация
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = [
+        document.getElementById('section-charts'),
+        document.getElementById('section-recommendations'),
+        document.getElementById('section-table'),
+        document.getElementById('section-cases'),
+        document.getElementById('section-performance'),
+        document.getElementById('section-final')
+    ];
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetEl = document.getElementById(targetId);
+            if (!targetEl) return;
+
+            navItems.forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+
+            const stickyNav = document.getElementById('stickyNav');
+            if (!stickyNav) return;
+            const navHeight = stickyNav.offsetHeight;
+            const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        });
+    });
+
+    // Подсветка активной кнопки при скролле
+    const navButtons = document.querySelectorAll('.nav-item');
+    window.addEventListener('scroll', function() {
+        const stickyNav = document.getElementById('stickyNav');
+        if (!stickyNav || sections.length === 0) return;
+        const navHeight = stickyNav.offsetHeight;
+
+        let currentSection = null;
+        sections.forEach((section, index) => {
+            if (!section) return;
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= navHeight + 10) {
+                currentSection = index;
+            }
+        });
+
+        navButtons.forEach(btn => {
+            btn.classList.remove('active');
+            const target = btn.getAttribute('data-target');
+            const targetIndex = ['section-charts', 'section-recommendations', 'section-table', 'section-cases', 'section-performance', 'section-final'].indexOf(target);
+            if (targetIndex === currentSection) {
+                btn.classList.add('active');
+            }
+        });
+    });
+});
+
+// Функция валидации и сохранения
+function validateAndSave() {
+    // Собираем все обязательные поля из блока "Оценка цели и задач" и "Итоговая оценка"
+    const perfFields = [
+        { id: 'perform_rating', label: 'Оценка выполнения целей и задач' },
+        { id: 'strengths', label: 'Сильные стороны' },
+        { id: 'weaknesses', label: 'Зоны роста' },
+        { id: 'goals_current', label: 'Текущая цель' },
+        { id: 'current_task', label: 'Основные задачи' },
+        { id: 'current_task_score', label: 'Оценка выполнения задач' },
+        { id: 'goal_future', label: 'Цель на следующие 6 месяцев' },
+        { id: 'future_task', label: 'Задачи на следующие 6 месяцев' },
+        { id: 'final_grade', label: 'Итоговый грейд' },
+        { id: 'final_justification', label: 'Обоснование грейда' }
+    ];
+    
+    // Собираем обязательные поля из кейсов (комментарий руководителя и уровень)
+    const caseFields = [];
+    document.querySelectorAll('[id^="case_"][id$="_comment"]').forEach(el => {
+        const caseId = el.id.replace('_comment', '').replace('case_', '');
+        caseFields.push({ id: el.id, label: `Комментарий к кейсу "${caseId}"` });
+    });
+    document.querySelectorAll('[id^="case_"][id$="_level"]').forEach(el => {
+        const caseId = el.id.replace('_level', '').replace('case_', '');
+        caseFields.push({ id: el.id, label: `Уровень для кейса "${caseId}"` });
+    });
+    
+    const allRequiredFields = [...perfFields, ...caseFields];
+
+    const missingFields = allRequiredFields.filter(field => {
+        const el = document.getElementById(field.id);
+        return !el || !el.value.trim();
+    });
+
+    if (missingFields.length > 0) {
+        const validationMessage = document.getElementById('validationMessage');
+        const validationList = document.getElementById('validationList');
+        
+        // Сбрасываем все предыдущие ошибки
+        document.querySelectorAll('.validation-error').forEach(el => {
+            el.classList.remove('validation-error');
+        });
+        
+        validationList.innerHTML = '';
+        missingFields.forEach(field => {
+            const li = document.createElement('li');
+            li.textContent = field.label;
+            validationList.appendChild(li);
+            
+            // Добавляем красную обводку к недостающим полям
+            const el = document.getElementById(field.id);
+            if (el) {
+                el.classList.add('validation-error');
+            }
+        });
+        
+        validationMessage.style.display = 'block';
+        validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    // Если валидация прошла успешно - убираем все ошибки
+    document.querySelectorAll('.validation-error').forEach(el => {
+        el.classList.remove('validation-error');
+    });
+
+    // Сбор данных для экспорта
+    const exportData = {
+        meta: REPORT_META,
+        employee: {
+            name: document.getElementById('employeeName')?.textContent || '',
+            position: document.getElementById('employeePosition')?.textContent || '',
+            department: document.getElementById('employeeDepartment')?.textContent || '',
+            hire_date: document.getElementById('employeeHireDate')?.textContent || ''
+        },
+        performance: {
+            perform_rating: document.getElementById('perform_rating')?.value || '',
+            strengths: document.getElementById('strengths')?.value || '',
+            weaknesses: document.getElementById('weaknesses')?.value || '',
+            goals_current: document.getElementById('goals_current')?.value || '',
+            current_task: document.getElementById('current_task')?.value || '',
+            current_task_score: document.getElementById('current_task_score')?.value || '',
+            ai_grade: document.getElementById('aiGradeValue')?.textContent || '',
+            manager_grade: document.getElementById('managerGradeValue')?.textContent || '',
+            task_score: document.getElementById('taskScoreValue')?.textContent || '',
+            goal_future: document.getElementById('goal_future')?.value || '',
+            future_task: document.getElementById('future_task')?.value || '',
+            final_grade: document.getElementById('final_grade')?.value || '',
+            final_justification: document.getElementById('final_justification')?.value || ''
+        }
+    };
+
+    // Создание Excel файла
+    try {
+        const wb = XLSX.utils.book_new();
+        
+        // Лист с основными данными
+        const mainData = [
+            ['Сотрудник', exportData.employee.name],
+            ['Должность', exportData.employee.position],
+            ['Отдел', exportData.employee.department],
+            ['Дата найма', exportData.employee.hire_date],
+            ['', ''],
+            ['Performance Rating', exportData.performance.perform_rating],
+            ['Сильные стороны', exportData.performance.strengths],
+            ['Зоны роста', exportData.performance.weaknesses],
+            ['Текущая цель', exportData.performance.goals_current],
+            ['Основные задачи', exportData.performance.current_task],
+            ['Оценка выполнения задач', exportData.performance.current_task_score],
+            ['', ''],
+            ['Оценка AI (кейсы)', exportData.performance.ai_grade],
+            ['Оценка руководителя (кейсы)', exportData.performance.manager_grade],
+            ['Оценка руководителя (задачи)', exportData.performance.task_score],
+            ['', ''],
+            ['Цель на следующие 6 месяцев', exportData.performance.goal_future],
+            ['Задачи на следующие 6 месяцев', exportData.performance.future_task],
+            ['', ''],
+            ['Итоговый грейд', exportData.performance.final_grade],
+            ['Обоснование грейда', exportData.performance.final_justification]
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(mainData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Итоговая оценка');
+        
+        // Скачивание файла
+        const filename = `Оценка_${exportData.employee.name.replace(/\\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        
+        alert('Отчет успешно сохранен!');
+    } catch (error) {
+        console.error('Ошибка при сохранении:', error);
+        alert('Произошла ошибка при сохранении файла. Проверьте консоль браузера.');
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+```
+# Logs
+*.log
+
+# Output directories
+individual_report/output/
+
+# Environment
+.env
+.env.local
+*.env.*
+```
