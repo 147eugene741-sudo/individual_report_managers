@@ -224,12 +224,13 @@ def _get_soft_skills_recommendation(avg_score: Optional[float], assessment_type:
     return "Нет данных для формирования вывода."
 
 
-def _get_behavioral_patterns(manager_soft: Dict[str, Optional[float]], manager_avg: Optional[float]) -> List[Dict[str, str]]:
+def _get_behavioral_patterns(manager_soft: Dict[str, Optional[float]], manager_avg: Optional[float], manager_managerial_avg: Optional[float]) -> List[Dict[str, str]]:
     """
     Возвращает список поведенческих паттернов на основе оценок руководителя по каждой компетенции.
     
     :param manager_soft: Словарь с оценками руководителя по soft-компетенциям
     :param manager_avg: Средняя оценка руководителя по всем soft-компетенциям
+    :param manager_managerial_avg: Средняя оценка руководителя по управленческим компетенциям
     :return: Список словарей с названием блока и текстом сценария из конфига
     """
     if manager_avg is None:
@@ -280,6 +281,30 @@ def _get_behavioral_patterns(manager_soft: Dict[str, Optional[float]], manager_a
                     'block_name': block_name,
                     'scenario': scenario_text
                 })
+    
+    # Добавляем буллит с управленческими компетенциями (всегда, если есть средняя оценка)
+    if manager_managerial_avg is not None:
+        scenario_list = BEHAVIORAL_PATTERNS.get('Управленческие компетенции', [])
+        managerial_scenario_text = None
+        
+        if scenario_list:
+            for min_score, max_score, text in scenario_list:
+                if min_score <= manager_managerial_avg <= max_score:
+                    managerial_scenario_text = text
+                    break
+            
+            # Если оценка вышла за пределы
+            if managerial_scenario_text is None:
+                if manager_managerial_avg > 4.0 and scenario_list:
+                    managerial_scenario_text = scenario_list[-1][2]
+                elif manager_managerial_avg < 1.0 and scenario_list:
+                    managerial_scenario_text = scenario_list[0][2]
+        
+        if managerial_scenario_text:
+            patterns.append({
+                'block_name': 'Управленческие компетенции',
+                'scenario': managerial_scenario_text
+            })
     
     return patterns
 
@@ -396,7 +421,11 @@ def merge_reports(self_data: Dict, manager_data: Dict, colleagues_data: Dict, ai
     }
     
     # Генерируем поведенческие паттерны на основе оценок руководителя
-    behavioral_patterns = _get_behavioral_patterns(manager_soft, manager_avg)
+    # manager_managerial_avg - средняя оценка руководителя по управленческим компетенциям
+    mgr_mgr_filtered = [s for s in manager_managerial_scores if s is not None]
+    manager_managerial_avg = round(sum(mgr_mgr_filtered) / len(mgr_mgr_filtered), 3) if mgr_mgr_filtered else None
+    
+    behavioral_patterns = _get_behavioral_patterns(manager_soft, manager_avg, manager_managerial_avg)
 
     performance = {
         'current_goals': '',
