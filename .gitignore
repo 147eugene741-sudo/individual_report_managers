@@ -1,28 +1,29 @@
 ```
-# Logs
-*.log
-
-# Output directories
-output/
-
-# Environment
-.env
-.env.local
-.env.*
+# Compiled and build artifacts
+*.pyc
+__pycache__/
 
 # Dependencies
 .venv/
 venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+node_modules/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
 
 # Editors
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
+# Build outputs
+dist/
+build/
+target/
 ```
