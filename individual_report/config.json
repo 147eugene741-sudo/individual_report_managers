@@ -461,7 +461,6 @@
     "output_dir": "output",
     "templates_dir": "templates",
     "static_dir": "static",
-    "vendor_dir": "static/vendor",
     "logs_dir": "logs"
   }
 }
