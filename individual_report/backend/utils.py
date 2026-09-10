@@ -32,3 +32,20 @@ def normalize_person_key(name: Optional[str]) -> str:
     Возвращает ключ для словарей AI-оценок (нижний регистр без лишних пробелов).
     """
     return normalize_person_name(name).lower()
+
+
+_INVALID_FILENAME_CHARS = re.compile(r'[\\/*?:"<>|]')
+
+
+def report_html_filename(full_name: str) -> str:
+    """
+    Имя автономного HTML-отчёта по ФИО сотрудника.
+
+    Пример: «Иванов Иван Иванович.html».
+    Пробелы сохраняются; заменяются только символы, недопустимые в имени файла.
+    """
+    name = normalize_person_name(full_name)
+    safe = _INVALID_FILENAME_CHARS.sub('_', name).rstrip(' .')
+    if not safe:
+        safe = 'report'
+    return f'{safe}.html'
