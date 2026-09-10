@@ -11,7 +11,7 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import base64
 
-from backend.parser import ExcelParser
+from backend.parser import ExcelParser, AmbiguousAssessmentTypeError, ASSESSMENT_TYPE_TITLES
 from backend.merge import merge_reports
 from backend.utils import normalize_person_name, report_html_filename
 from backend.config_validator import validate_config
@@ -72,11 +72,26 @@ def get_employee_name_from_file(file_path: str) -> Optional[str]:
         return None
 
 
-def group_files_by_employee(data_dir: str) -> Dict[str, Dict[str, str]]:
+def log_skipped_ambiguous_files(skipped: List[Dict[str, object]]) -> None:
+    """Пишет в конце прогона предупреждения о файлах с несколькими чужими ролями."""
+    if not skipped:
+        return
+    logger.warning(
+        "Следующие файлы не обработаны: в них заполнены оценки нескольких ролей "
+        "(руководитель / коллеги / подчинённые):"
+    )
+    for item in skipped:
+        roles = ', '.join(ASSESSMENT_TYPE_TITLES.get(t, t) for t in item['roles'])
+        logger.warning(
+            f"  - {item['file']} (сотрудник: {item['employee']}; роли: {roles})"
+        )
+
+
+def group_files_by_employee(data_dir: str) -> Tuple[Dict[str, Dict[str, str]], List[Dict[str, object]]]:
     files = glob.glob(os.path.join(data_dir, '*.xlsx'))
     if not files:
         logger.warning(f"В папке {data_dir} не найдено .xlsx файлов")
-        return {}
+        return {}, []
 
     # Фильтруем временные и AI-файлы
     files = [f for f in files if not os.path.basename(f).startswith('~$') and not is_eval_file(f)]
@@ -90,6 +105,7 @@ def group_files_by_employee(data_dir: str) -> Dict[str, Dict[str, str]]:
             logger.warning(f"Не удалось определить имя оцениваемого в файле: {os.path.basename(f)}")
 
     result = {}
+    skipped_ambiguous: List[Dict[str, object]] = []
     for emp_name, file_list in raw_groups.items():
         # Определяем обязательные типы файлов (исключаем subordinates, так как он опционален)
         required_types = [t for t in FILE_TYPES if t != 'subordinates']
@@ -108,6 +124,12 @@ def group_files_by_employee(data_dir: str) -> Dict[str, Dict[str, str]]:
                         types_found[atype] = f
                     else:
                         logger.warning(f"В файле {os.path.basename(f)} не найдена таблица компетенций")
+            except AmbiguousAssessmentTypeError as e:
+                skipped_ambiguous.append({
+                    'file': os.path.basename(f),
+                    'employee': emp_name,
+                    'roles': e.found_types,
+                })
             except Exception as e:
                 logger.error(f"Ошибка при определении типа файла {os.path.basename(f)}: {e}")
 
@@ -118,7 +140,7 @@ def group_files_by_employee(data_dir: str) -> Dict[str, Dict[str, str]]:
 
         result[emp_name] = types_found
 
-    return result
+    return result, skipped_ambiguous
 
 
 def load_ai_scores(data_dir: str) -> Dict[Tuple[str, str], Dict[str, str]]:
@@ -294,9 +316,10 @@ def main(data_dir: Optional[str] = None, output_dir: Optional[str] = None) -> No
 
     ai_scores = load_ai_scores(data_dir)
 
-    groups = group_files_by_employee(data_dir)
+    groups, skipped_ambiguous = group_files_by_employee(data_dir)
     if not groups:
         logger.warning("Не найдено ни одной полной группы файлов для сотрудников.")
+        log_skipped_ambiguous_files(skipped_ambiguous)
         return
 
     logger.info(f"Найдено {len(groups)} сотрудников:")
@@ -312,6 +335,7 @@ def main(data_dir: Optional[str] = None, output_dir: Optional[str] = None) -> No
     logger.info(f"\n🎉 Обработка завершена. Успешно: {success_count} из {len(groups)}.")
     if success_count < len(groups):
         logger.warning("Некоторые сотрудники не были обработаны. Проверьте логи выше.")
+    log_skipped_ambiguous_files(skipped_ambiguous)
 
 
 if __name__ == '__main__':

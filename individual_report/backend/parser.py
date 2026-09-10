@@ -9,6 +9,28 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 logger = logging.getLogger(__name__)
 
+ASSESSMENT_TYPE_TITLES = {
+    'self': 'самооценка',
+    'manager': 'руководитель',
+    'colleagues': 'коллеги',
+    'subordinates': 'подчинённые',
+}
+NON_SELF_ASSESSMENT_TYPES = ('manager', 'colleagues', 'subordinates')
+
+
+class AmbiguousAssessmentTypeError(ValueError):
+    """Файл содержит оценки сразу нескольких ролей (кроме самооценки)."""
+
+    def __init__(self, found_types: List[str], file_path: str = ''):
+        self.found_types = list(found_types)
+        self.file_path = file_path
+        roles = ', '.join(ASSESSMENT_TYPE_TITLES.get(t, t) for t in self.found_types)
+        location = f" {os.path.basename(file_path)}" if file_path else ''
+        super().__init__(
+            f"В файле{location} найдены оценки нескольких ролей: {roles}. Файл пропущен."
+        )
+
+
 # Путь к корню проекта (на уровень выше backend)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.environ.get('CONFIG_PATH', os.path.join(BASE_DIR, 'config.json'))
@@ -155,19 +177,30 @@ class ExcelParser:
             logger.warning(f"Ошибка при извлечении метаданных: {e}")
         return meta
 
+    def _column_label_to_type(self) -> Dict[str, str]:
+        mapping = {
+            PARSER_CONFIG['self_column_label']: 'self',
+            PARSER_CONFIG['manager_column_label']: 'manager',
+            PARSER_CONFIG['colleagues_column_label']: 'colleagues',
+        }
+        subordinates_label = PARSER_CONFIG.get('subordinates_column_label')
+        if subordinates_label:
+            mapping[subordinates_label] = 'subordinates'
+        return mapping
+
     def _detect_assessment_type(self, header_row: int) -> str:
         """
         Определяет тип опроса (self, manager, colleagues, subordinates) по наличию оценок в колонках.
+
+        Если заполнены самооценка и ровно одна чужая роль — файл относится к этой роли.
+        Если заполнены две или более чужие роли — файл неоднозначен и не обрабатывается.
         """
+        label_to_type = self._column_label_to_type()
         col_map = {}
-        for col_name in [PARSER_CONFIG['self_column_label'],
-                         PARSER_CONFIG['manager_column_label'],
-                         PARSER_CONFIG['colleagues_column_label'],
-                         PARSER_CONFIG.get('subordinates_column_label')]:
-            if col_name:  # Проверяем, что ключ существует
-                col_idx = self._get_column_index(header_row, col_name)
-                if col_idx:
-                    col_map[col_name] = col_idx
+        for col_name in label_to_type:
+            col_idx = self._get_column_index(header_row, col_name)
+            if col_idx:
+                col_map[col_name] = col_idx
 
         scores_found = {col_name: False for col_name in col_map}
         for row in range(header_row + 1, min(header_row + 30, self.sheet.max_row + 1)):
@@ -185,14 +218,27 @@ class ExcelParser:
                 if self._normalize_score(val) is not None:
                     scores_found[col_name] = True
 
-        if scores_found.get(PARSER_CONFIG['self_column_label']):
+        scores_by_type = {
+            label_to_type[col_name]: found
+            for col_name, found in scores_found.items()
+        }
+        filled_types = [t for t, found in scores_by_type.items() if found]
+        filled_non_self = [t for t in NON_SELF_ASSESSMENT_TYPES if scores_by_type.get(t)]
+
+        if len(filled_non_self) > 1:
+            raise AmbiguousAssessmentTypeError(filled_types, self.file_path)
+
+        if len(filled_non_self) == 1:
+            detected = filled_non_self[0]
+            if scores_by_type.get('self'):
+                logger.info(
+                    f"Файл {os.path.basename(self.file_path)} содержит самооценку и оценки "
+                    f"«{ASSESSMENT_TYPE_TITLES[detected]}», отнесён к типу {detected}"
+                )
+            return detected
+
+        if scores_by_type.get('self'):
             return 'self'
-        if scores_found.get(PARSER_CONFIG['manager_column_label']):
-            return 'manager'
-        if scores_found.get(PARSER_CONFIG['colleagues_column_label']):
-            return 'colleagues'
-        if PARSER_CONFIG.get('subordinates_column_label') and scores_found.get(PARSER_CONFIG['subordinates_column_label']):
-            return 'subordinates'
 
         # fallback по имени опроса
         meta = self._extract_meta()
